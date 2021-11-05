@@ -13,7 +13,7 @@ to activate the environment on windows
 `.\venv\Scripts\Activate.ps1`
 
 to activate the environment on mac
-`source venv/Scripts/activate`
+`source venv/bin/activate`
 
 - install packages
 `pip install -r requirements.txt`
