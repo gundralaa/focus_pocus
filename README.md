@@ -6,14 +6,14 @@ Application used to monitor user focus during study sessions and provide neurofe
 - install python 3.9
 - create virtual environment
 
-`python3 -m venv env`
+`python3 -m venv venv`
 this will create a directory \venv
 
 to activate the environment on windows
 `.\venv\Scripts\Activate.ps1`
 
 to activate the environment on mac
-`source venv\Scripts\activate`
+`source venv/bin/activate`
 
 - install packages
 `pip install -r requirements.txt`
