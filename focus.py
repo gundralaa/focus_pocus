@@ -16,6 +16,8 @@ import numpy as np
 import time
 
 from pipes.alpha_power import alpha_pipe
+from pipes.display_pipe import display_pipe, Graph
+import matplotlib.pyplot as plt
 from brainflow.board_shim import BoardIds, BoardShim, BrainFlowInputParams
 
 EPOCH_LEN = 1024
@@ -24,15 +26,15 @@ def connect_and_stream(args):
     # board parameters
     params = BrainFlowInputParams()
     params.serial_port = args.port
-    # ganglion board object
-    board = BoardShim(BoardIds.GANGLION_BOARD, params)
+    # BOARD TYPE -------
+    board = BoardShim(BoardIds.MUSE_S_BLED_BOARD, params)
+    #board = BoardShim(BoardIds.GANGLION_BOARD, params)
     board.prepare_session()
     board.start_stream(EPOCH_LEN * 4)
     return board
 
-def poll_data(board, pipe):
+def poll_data(data, pipe):
     time.sleep(1)
-    data = board.get_current_board_data(EPOCH_LEN)
     print(len(data[0]))
     # run pipeline on data
     metric = pipe(data)
@@ -52,13 +54,24 @@ def kill_stream(board):
 if __name__ == '__main__':
     BoardShim.enable_dev_board_logger()
     board = connect_and_stream(get_args())
-    pipe = alpha_pipe(board)
-    try: 
-        while True:
-            # replace the pipe below
-            metric = poll_data(board, pipe)
-            # poll_data(board, print)
-            print('focus: ', metric)
+    
+    # --- PIPES ----
+    # demo pipe
+    alpha = alpha_pipe(board)
+
+    # BOARD INFO
+    id = board.get_board_id()
+    sampling_rate = BoardShim.get_sampling_rate(id)
+    eeg_channels = BoardShim.get_eeg_channels(id)
+    print('board_id:', id)
+    print('number of channels', eeg_channels)
+    print('sampling rate', sampling_rate)
+    
+    ## STREAM
+    # display_pipe(board, EPOCH_LEN)
+    try:
+        print("------- START STREAM -------")
+        Graph(board, alpha)
     finally:
+        print("------- END STREAM ------")
         kill_stream(board)
-        print("Exited")
