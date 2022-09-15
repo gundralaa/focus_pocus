@@ -6,6 +6,8 @@ Calculates alpha band power
 """
 import argparse
 import logging
+import collections
+from pipes.pipe import Pipe
 
 from brainflow.board_shim import BoardShim, BrainFlowInputParams, BoardIds
 from brainflow.data_filter import DataFilter, FilterTypes, DetrendOperations
@@ -42,18 +44,21 @@ def display_pipe(board, epoch_len):
 
 # PYQT (NEW)
 class Graph:
-    def __init__(self, board_shim, pipe=None):
+    def __init__(self, board_shim, pipes):
         self.board_id = board_shim.get_board_id()
         self.board_shim = board_shim
-        self.pipe = pipe
         self.exg_channels = BoardShim.get_exg_channels(self.board_id)
         self.sampling_rate = BoardShim.get_sampling_rate(self.board_id)
         self.update_speed_ms = 50
         self.window_size = 4
         self.num_points = self.window_size * self.sampling_rate
+        self.pipes = pipes
+
+        # Bio Signal Focus
+        self.buffers = []
 
         self.app = QtGui.QApplication([])
-        self.win = pg.GraphicsWindow(title='Plot',size=(800, 600))
+        self.win = pg.GraphicsWindow(title='Plot',size=(1200, 900))
 
         self._init_timeseries()
 
@@ -61,29 +66,46 @@ class Graph:
         timer.timeout.connect(self.update)
         timer.start(self.update_speed_ms)
         QtGui.QApplication.instance().exec_()
-
-
+        
     def _init_timeseries(self):
         self.plots = list()
         self.curves = list()
-        # --- CREATE PIPE DATA PLOT ---
-        # ----------------------------
-        # Channels
-        for i in range(len(self.exg_channels)):
-            p = self.win.addPlot(row=i,col=0)
+        row = 0
+        def create_plot(name):
+            nonlocal row
+            p = self.win.addPlot(row=row,col=0)
             p.showAxis('left', False)
             p.setMenuEnabled('left', False)
             p.showAxis('bottom', False)
             p.setMenuEnabled('bottom', False)
-            p.setTitle('Channel ' + str(i))
+            p.setTitle(name)
             self.plots.append(p)
             curve = p.plot()
             self.curves.append(curve)
+            row += 1
+
+        # --- CREATE PIPE DATA PLOT ---
+        for pipe in self.pipes:
+            create_plot(repr(pipe))
+            self.buffers.append(collections.deque(maxlen=1000))
+
+        # ----------------------------
+        # Channels
+        for i in range(0, len(self.exg_channels)):
+            create_plot('Channel: ' + str(i))
 
 
     def update(self):
         data = self.board_shim.get_current_board_data(self.num_points)
+        num_pipes = len(self.pipes)
+        # Pipes
+        for count, pipe in enumerate(self.pipes):
+            val = pipe.apply(data)
+            self.buffers[count].append(val)
+            self.curves[count].setData(list(self.buffers[count]))
+        # Signals 
         for count, channel in enumerate(self.exg_channels):
+            ind = count + num_pipes
             # plot timeseries
             DataFilter.detrend(data[channel], DetrendOperations.CONSTANT.value)
             # BAND PASS FILTERS -------
@@ -97,9 +119,7 @@ class Graph:
             DataFilter.perform_bandstop(data[channel], self.sampling_rate, 60.0, 4.0, 2,
                                         FilterTypes.BUTTERWORTH.value, 0)
             # --- SET DATA ---
-            self.curves[count].setData(data[channel].tolist())
-        # --- UPDATE PIPE DATA PLOT
-        # -------------------------
-
+            self.curves[ind].setData(data[channel].tolist())
+        
         self.app.processEvents()
 

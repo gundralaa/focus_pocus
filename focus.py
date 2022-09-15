@@ -15,8 +15,10 @@ import argparse
 import numpy as np
 import time
 
-from pipes.alpha_power import alpha_pipe
-from pipes.display_pipe import display_pipe, Graph
+from pprint import pprint
+
+from pipes.focus_pipe import focus_pipe
+from pipes.graph import Graph
 import matplotlib.pyplot as plt
 from brainflow.board_shim import BoardIds, BoardShim, BrainFlowInputParams
 
@@ -28,11 +30,12 @@ def connect_and_stream(args):
     params.serial_port = args.port
     # BOARD TYPE -------
     board = BoardShim(BoardIds.MUSE_S_BLED_BOARD, params)
-    #board = BoardShim(BoardIds.GANGLION_BOARD, params)
+    # board = BoardShim(BoardIds.GANGLION_BOARD, params)
     board.prepare_session()
     board.start_stream(EPOCH_LEN * 4)
     return board
 
+# TODO: DELETE
 def poll_data(data, pipe):
     time.sleep(1)
     print(len(data[0]))
@@ -57,12 +60,15 @@ if __name__ == '__main__':
     
     # --- PIPES ----
     # demo pipe
-    alpha = alpha_pipe(board)
-
+    focus_p = focus_pipe(board, 'alpha')
+    focus2_p = focus_pipe(board, 'theta_ratio')
+    focus3_p = focus_pipe(board, 'total_ratio')
+    pipes = [focus_p, focus2_p]
     # BOARD INFO
     id = board.get_board_id()
     sampling_rate = BoardShim.get_sampling_rate(id)
     eeg_channels = BoardShim.get_eeg_channels(id)
+    
     print('board_id:', id)
     print('number of channels', eeg_channels)
     print('sampling rate', sampling_rate)
@@ -71,7 +77,7 @@ if __name__ == '__main__':
     # display_pipe(board, EPOCH_LEN)
     try:
         print("------- START STREAM -------")
-        Graph(board, alpha)
+        Graph(board, pipes)
     finally:
         print("------- END STREAM ------")
         kill_stream(board)
