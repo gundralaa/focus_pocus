@@ -10,6 +10,7 @@ from random import choice
 from glob import glob
 import argparse
 import numpy as np
+import datetime
 
 from pprint import pprint
 
@@ -19,8 +20,8 @@ from psychopy import visual, core, event
 from stimuli import FACE_HOUSE
 
 # LABEL
-# 0 = face
-# 1 = house
+# 1 = face
+# 2 = house
 
 EPOCH_LEN = 1024
 # Hyper Params
@@ -54,7 +55,8 @@ def record_buffer(board : BoardShim):
     eeg_ind = BoardShim.get_eeg_channels(b_id)
     inds = [time_ind, mark_ind] + eeg_ind
     arr = data[inds]
-    np.savetxt('test_1.txt', arr, fmt='%d')
+    f_name = datetime.datetime.now().strftime("%m-%d-%y-%H-%M")
+    np.savetxt('./notebooks/data/' + f_name + '.txt', arr, fmt='%d')
     
 
 
@@ -98,19 +100,20 @@ def instructions():
 def experiment(stimuli, window, mark_fn):
     for i in range(10):
         label = i % 2
-        image = choice(stimuli[label])
-        image.draw()
-
-        # mark in stream
+        image = choice(stimuli[label])        
+        # mark in stream start and end
         mark_fn(label)
+        image.draw()
+        core.wait(capture_len)
+        mark_fn(label)
+        
+        # blank screen
         window.flip()
         
         # wait and turn off
-        core.wait(capture_len)
+        core.wait(inter_interval)
         window.flip()
 
-        event.waitKeys()
-        event.clearEvents()
 
 def main():
     # streaming init
@@ -123,6 +126,7 @@ def main():
         time_stamp = board.get_current_board_data(1)[time_ind][0]
         # NOTE: 1 here is face and 2 here is house
         board.insert_marker(label + 1)
+        # debug
         time_start = min(time_stamp, time_start)
         markers.append([time_stamp - time_start, label])
     
@@ -131,6 +135,8 @@ def main():
     instructions()
     stim = load_imag(main_win)
     experiment(stim, main_win, mark)
+    
+    # debug
     print(time_start, markers)
 
     # record and kill board
