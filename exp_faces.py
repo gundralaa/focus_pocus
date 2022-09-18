@@ -50,10 +50,12 @@ def record_buffer(board : BoardShim):
     b_id = board.get_board_id()
     print("DEBUG:n:", n)
     data = board.get_board_data()
+    
     time_ind = BoardShim.get_timestamp_channel(b_id)
     mark_ind = BoardShim.get_marker_channel(b_id)
     eeg_ind = BoardShim.get_eeg_channels(b_id)
     inds = [time_ind, mark_ind] + eeg_ind
+    
     arr = data[inds]
     f_name = datetime.datetime.now().strftime("%m-%d-%y-%H-%M")
     np.savetxt('./notebooks/data/' + f_name + '.txt', arr, fmt='%d')
@@ -99,13 +101,12 @@ def instructions():
 
 def experiment(stimuli, window, mark_fn):
     for i in range(10):
-        label = i % 2
+        label = (i % 2) + 1
         image = choice(stimuli[label])        
         # mark in stream start and end
         mark_fn(label)
         image.draw()
         core.wait(capture_len)
-        mark_fn(label)
         
         # blank screen
         window.flip()
@@ -119,16 +120,15 @@ def main():
     # streaming init
     board = connect_and_stream(get_args())
     time_ind = BoardShim.get_timestamp_channel(board.get_board_id())
-    markers = []
+    dbg_markers = []
     time_start = np.inf
     def mark(label):
         nonlocal time_start
-        time_stamp = board.get_current_board_data(1)[time_ind][0]
-        # NOTE: 1 here is face and 2 here is house
-        board.insert_marker(label + 1)
+        board.insert_marker(label)
         # debug
+        time_stamp = board.get_current_board_data(1)[time_ind][0]
         time_start = min(time_stamp, time_start)
-        markers.append([time_stamp - time_start, label])
+        dbg_markers.append([time_stamp - time_start, label])
     
     # main win
     main_win = visual.Window([800, 600], units='deg', monitor='testMonitor')
@@ -137,7 +137,7 @@ def main():
     experiment(stim, main_win, mark)
     
     # debug
-    print(time_start, markers)
+    print(time_start, dbg_markers)
 
     # record and kill board
     record_buffer(board)
