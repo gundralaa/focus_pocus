@@ -102,7 +102,7 @@ def instructions():
 def experiment(stimuli, window, mark_fn):
     for i in range(10):
         label = (i % 2) + 1
-        image = choice(stimuli[label])        
+        image = choice(stimuli[label - 1])        
         # mark in stream start and end
         mark_fn(label)
         image.draw()
