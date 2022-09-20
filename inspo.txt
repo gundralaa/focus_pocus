@@ -1,0 +1,2 @@
+p300
+https://github.com/urish/muse-lsl-python/blob/master/notebooks/P300%20with%20Muse.ipynb
