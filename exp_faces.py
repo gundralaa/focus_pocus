@@ -54,7 +54,7 @@ def record_buffer(board : BoardShim):
     time_ind = BoardShim.get_timestamp_channel(b_id)
     mark_ind = BoardShim.get_marker_channel(b_id)
     eeg_ind = BoardShim.get_eeg_channels(b_id)
-    inds = [time_ind, mark_ind] + eeg_ind
+    inds = [mark_ind] + eeg_ind
     
     arr = data[inds]
     f_name = datetime.datetime.now().strftime("%m-%d-%y-%H-%M")
