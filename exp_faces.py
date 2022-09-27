@@ -17,6 +17,8 @@ from pprint import pprint
 from brainflow.board_shim import BoardIds, BoardShim, BrainFlowInputParams
 from psychopy import visual, core, event
 
+import mne
+
 from stimuli import FACE_HOUSE
 
 # LABEL
@@ -54,12 +56,23 @@ def record_buffer(board : BoardShim):
     time_ind = BoardShim.get_timestamp_channel(b_id)
     mark_ind = BoardShim.get_marker_channel(b_id)
     eeg_ind = BoardShim.get_eeg_channels(b_id)
-    inds = [mark_ind] + eeg_ind
     
-    arr = data[inds]
-    f_name = datetime.datetime.now().strftime("%m-%d-%y-%H-%M")
-    np.savetxt('./notebooks/data/' + f_name + '.txt', arr, fmt='%d')
+    # select data and convert to V
+    data_arr = data[eeg_ind, :]
+    data_arr = data_arr / 1000000
+
+    # Creating MNE objects from brainflow data arrays
+    ch_types = ['eeg'] * len(eeg_ind)
+    ch_names = BoardShim.get_eeg_names(b_id)
+    sfreq = BoardShim.get_sampling_rate(b_id)
     
+    # create info
+    info = mne.create_info(ch_names=ch_names, sfreq=sfreq, ch_types=ch_types)
+    raw = mne.io.RawArray(data_arr, info)
+
+    # save as raw
+    f_name = './notebooks/data/' + datetime.datetime.now().strftime("%m-%d-%y-%H-%M") + 'raw.fif'
+    raw.save(f_name)
 
 
 def kill_stream(board):
