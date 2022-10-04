@@ -103,6 +103,7 @@ class Graph:
             val = pipe.apply(data)
             self.buffers[count].append(val)
             self.curves[count].setData(list(self.buffers[count]))
+        
         # Signals 
         for count, channel in enumerate(self.exg_channels):
             ind = count + num_pipes
