@@ -1,0 +1,52 @@
+target python;
+
+reactor Rods {
+    input image
+    output gray_scale
+}
+
+reactor Cones {
+    input image
+    output rgb_scale
+}
+
+reactor V1 {
+    input in_img
+    output out_img
+}
+
+reactor V2 {
+    input in_img
+    output out_img
+}
+
+reactor Eyes {
+    input image
+    cone = new Cones();
+    rod = new Rods();
+
+    image -> cone.image;
+    image -> rod.image;
+
+    output flip
+}
+
+reactor OccipitalLobe {
+    input in_img
+    output out_img
+
+    v1 = new V1();
+    v2 = new V2();
+
+    in_img -> v1.in_img;
+    v1.out_img -> v2.in_img;
+    v2.out_img -> out_img
+
+}
+
+reactor Vision {
+    eye = new Eyes();
+    op = new OccipitalLobe();
+
+    eye.flip -> op.in_img
+}
