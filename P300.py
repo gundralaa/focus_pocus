@@ -17,8 +17,9 @@ class Experiment:
 
         for letter in letters:
             stimulus.setText(letter)
+            stimulus.size = 1
             stimulus.draw()
             win.flip()
-            core.wait(2.0)
+            core.wait(0.5)
         
 expr = Experiment(500, 500)
