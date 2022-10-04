@@ -1,6 +1,3 @@
-import psychopy
-import time
-
 from psychopy import visual, core
 
 # Code for P300
