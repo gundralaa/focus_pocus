@@ -1,0 +1,14 @@
+all references to pipe objects
+    name_p -> must be followed
+
+band_powers
+- in: raw data mat
+- out: tuple
+    ORDER: [delta, theta, alpha, beta, gamma]
+    - tuple[0] -> avg band powers ORDER
+    - tuple[1] -> std band powers ORDER
+
+alpha_power
+"focus metric output" 
+- in: 
+- out:
