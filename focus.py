@@ -17,8 +17,8 @@ import time
 
 from pprint import pprint
 
-from pipes.focus_pipe import focus_pipe
-from pipes.graph import Graph
+from lib.focus_pipe import focus_pipe
+from lib.graph import Graph
 import matplotlib.pyplot as plt
 from brainflow.board_shim import BoardIds, BoardShim, BrainFlowInputParams
 
@@ -64,6 +64,7 @@ if __name__ == '__main__':
     focus2_p = focus_pipe(board, 'theta_ratio')
     focus3_p = focus_pipe(board, 'total_ratio')
     pipes = [focus_p, focus2_p]
+
     # BOARD INFO
     id = board.get_board_id()
     sampling_rate = BoardShim.get_sampling_rate(id)
@@ -77,6 +78,7 @@ if __name__ == '__main__':
     # display_pipe(board, EPOCH_LEN)
     try:
         print("------- START STREAM -------")
+        print(BoardShim.get_board_descr(id))
         Graph(board, pipes)
     finally:
         print("------- END STREAM ------")
