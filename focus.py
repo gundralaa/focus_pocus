@@ -18,6 +18,7 @@ import time
 from pprint import pprint
 
 from lib.focus_pipe import focus_pipe
+from lib.corr import corr_pipe
 from lib.graph import Graph
 import matplotlib.pyplot as plt
 from brainflow.board_shim import BoardIds, BoardShim, BrainFlowInputParams
@@ -63,7 +64,9 @@ if __name__ == '__main__':
     focus_p = focus_pipe(board, 'alpha')
     focus2_p = focus_pipe(board, 'theta_ratio')
     focus3_p = focus_pipe(board, 'total_ratio')
-    pipes = [focus_p, focus2_p]
+    corr_p = corr_pipe(board)
+    #pipes = [focus_p, focus2_p, corr_p]
+    pipes = [corr_p]
 
     # BOARD INFO
     id = board.get_board_id()

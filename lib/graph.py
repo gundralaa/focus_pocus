@@ -10,6 +10,7 @@ from brainflow.board_shim import BoardShim
 from brainflow.data_filter import DataFilter, FilterTypes, DetrendOperations
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtGui, QtCore
+import numpy as np
 
 # PYQT (NEW)
 class Graph:
@@ -72,6 +73,8 @@ class Graph:
             val = pipe.apply(data)
             self.buffers[count].append(val)
             self.curves[count].setData(list(self.buffers[count]))
+            # DEBUG
+            print('mean corr', np.mean(self.buffers[count]))
         # Signals 
         for count, channel in enumerate(self.exg_channels):
             ind = count + num_pipes
