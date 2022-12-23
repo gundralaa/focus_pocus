@@ -30,6 +30,11 @@ run the script using the port you found above
 ## Pipes
 to write a new pipe create a python file in \pipes and create one function. the input to the function will be an array of raw eeg data sampled at a specified interval. Examples are in the \pipes.
 
+# Our Love Affair With Julia
+Oh
 
+what a world. compiled scripting code almost as fast as c using a just in time complier! the julia extension is a set of notebooks that utilize streaming to apply different biosignal analysis pipelines.
+
+best thing, we interop with c. yes. filters go burrr hunny.
 
 
